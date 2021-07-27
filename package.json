@@ -1,0 +1,18 @@
+{
+  "name": "spinal-env-viewer-plugin-nomenclature-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "spinal-core-connectorjs_type": "git+https://github.com/spinalcom/spinal-core-connectorjs_type.git",
+    "spinal-env-viewer-graph-service": "git+https://github.com/spinalcom/Spinal-Graph-Service.git",
+    "spinal-env-viewer-plugin-group-manager-service": "git+https://github.com/spinalcom/spinal-env-viewer-plugin-group-manager-service.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
