@@ -1,5 +1,6 @@
 import { groupManagerService } from "spinal-env-viewer-plugin-group-manager-service";
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
+import { IGroups } from "../interfaces/IGroups";
 
 export class NomenclatureTree {
 
@@ -14,10 +15,31 @@ export class NomenclatureTree {
     * @param contextName - string - not required
     * @returns Promise<SpinalContext>
     */
-   public createOrGetContext(contextName?: string) : Promise<SpinalContext<any>> {
-      if(!contextName || contextName.trim().length === 0) contextName = this.defaultContextName;
+   public async createOrGetContext(contextName?: string) : Promise<SpinalContext<any>> {
+      let isDefault = false;
+      if(!contextName || contextName?.trim().length === 0) {
+         const defaultContext = await this.getDefaultContext();
+         if(defaultContext) return defaultContext;
 
-      return groupManagerService.createGroupContext(contextName.trim(),this.profileNodeType);      
+         isDefault = true;
+         contextName = this.defaultContextName
+      };
+      
+      const context = await groupManagerService.createGroupContext(contextName.trim(),this.profileNodeType);      
+      if(!isDefault) return context;
+
+      if(context.info.isDefault) context.info.isDefault.set(isDefault);
+      else context.info.add_attr({isDefault: true});
+
+      return context;
+   }
+
+ 
+   public async getDefaultContext(): Promise<SpinalContext<any>> {
+      const contexts = await this.getContexts();
+      const found = (<any>contexts).find(el => typeof (<any>el).info.isDefault !== "undefined");
+      if(found) return found;
+
    }
 
 
@@ -29,7 +51,7 @@ export class NomenclatureTree {
    public async getContexts(contextName?: string): Promise<SpinalContext<any>[] | SpinalContext<any> >{
       const contexts = await groupManagerService.getGroupContexts(this.profileNodeType);
       if(contextName && contextName.trim().length > 0) {
-         const context = contexts.filter(el => el.name === contextName || el.id === contextName);
+         const context = contexts.find(el => el.name === contextName || el.id === contextName);
          return SpinalGraphService.getRealNode(context?.id);
       }
 
@@ -61,7 +83,7 @@ export class NomenclatureTree {
     */
    public async createCategory(categoryName : string, iconName: string = "settings",contextId? : string) : Promise<SpinalNode<any>> {
       if(!contextId) {
-         const context = await this.createOrGetContext();
+         const context = await this.getDefaultContext();
          contextId = context.getId().get();
       }
 
@@ -75,10 +97,16 @@ export class NomenclatureTree {
     * @param categoryName  - category name or id (not required)
     * @returns 
     */
-   public async getCategories(contextId: string, categoryName?: string) : Promise<SpinalNode<any> |SpinalNode<any>[]> {
+   public async getCategories(categoryName?: string, contextId?: string) : Promise<SpinalNode<any> |SpinalNode<any>[]> {
+      if(typeof contextId === "undefined") {
+         const context = await this.getDefaultContext()
+         contextId = context.getId().get();
+      }     
+
       const categories = await groupManagerService.getCategories(contextId);
+      
       if(categoryName && categoryName.trim().length > 0) {
-         const category = categories.filter(el => el.name.get() === categoryName || el.id.get() === categoryName);
+         const category = categories.find(el => el.name.get() === categoryName || el.id.get() === categoryName);
          return SpinalGraphService.getRealNode(category?.id?.get());
       }
 
@@ -140,6 +168,33 @@ export class NomenclatureTree {
 
          return node;
       }
+   }
+
+   /**
+    * This methods takes as parameters a contextId and category id (not required), it returns all groups in category (or categories if not category id is set) in context
+    * @param contextId - context id
+    * @param categoryId - category id (not required)
+    * @returns 
+    */
+   public async getGroups(contextId: string, categoryId?:string): Promise<IGroups[]> {
+      let categories = await this.getCategories(categoryId,contextId);
+      if(categories) {
+         if(!Array.isArray(categories)) categories = [categories];
+         const promises = categories.map(async category => {
+            const info = category.info.get();
+            info.groups = await groupManagerService.getGroups(category.getId().get());
+            return info;
+         })
+
+         return Promise.all(promises).then((cats) => {
+            return cats.map(category => {
+               category.groups = category.groups.map(el => SpinalGraphService.getRealNode(el.id.get()));
+               return category
+            })
+         })
+      }
+
+      return []
    }
 
 }

@@ -19,7 +19,10 @@ function applyMixins(derivedConstructor: any, baseConstructors: any[]) {
    });
 }
 
-class SpinalNomenclatureService {};
+class SpinalNomenclatureService {
+    public profileNodeType: string = "AttributeConfiguration";
+    public defaultContextName: string = "NomenclatureConfiguration";
+};
 
 interface SpinalNomenclatureService extends NomenclatureProfil, NomenclatureTree {};
 

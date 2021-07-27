@@ -24,9 +24,33 @@ class NomenclatureTree {
      * @returns Promise<SpinalContext>
      */
     createOrGetContext(contextName) {
-        if (!contextName || contextName.trim().length === 0)
-            contextName = this.defaultContextName;
-        return spinal_env_viewer_plugin_group_manager_service_1.groupManagerService.createGroupContext(contextName.trim(), this.profileNodeType);
+        return __awaiter(this, void 0, void 0, function* () {
+            let isDefault = false;
+            if (!contextName || (contextName === null || contextName === void 0 ? void 0 : contextName.trim().length) === 0) {
+                const defaultContext = yield this.getDefaultContext();
+                if (defaultContext)
+                    return defaultContext;
+                isDefault = true;
+                contextName = this.defaultContextName;
+            }
+            ;
+            const context = yield spinal_env_viewer_plugin_group_manager_service_1.groupManagerService.createGroupContext(contextName.trim(), this.profileNodeType);
+            if (!isDefault)
+                return context;
+            if (context.info.isDefault)
+                context.info.isDefault.set(isDefault);
+            else
+                context.info.add_attr({ isDefault: true });
+            return context;
+        });
+    }
+    getDefaultContext() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const contexts = yield this.getContexts();
+            const found = contexts.find(el => typeof el.info.isDefault !== "undefined");
+            if (found)
+                return found;
+        });
     }
     /**
      * This method returns a context (if contextName or id is passed) or all profil contexts
@@ -37,7 +61,7 @@ class NomenclatureTree {
         return __awaiter(this, void 0, void 0, function* () {
             const contexts = yield spinal_env_viewer_plugin_group_manager_service_1.groupManagerService.getGroupContexts(this.profileNodeType);
             if (contextName && contextName.trim().length > 0) {
-                const context = contexts.filter(el => el.name === contextName || el.id === contextName);
+                const context = contexts.find(el => el.name === contextName || el.id === contextName);
                 return spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(context === null || context === void 0 ? void 0 : context.id);
             }
             return contexts.map(el => spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(el === null || el === void 0 ? void 0 : el.id));
@@ -68,7 +92,7 @@ class NomenclatureTree {
     createCategory(categoryName, iconName = "settings", contextId) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!contextId) {
-                const context = yield this.createOrGetContext();
+                const context = yield this.getDefaultContext();
                 contextId = context.getId().get();
             }
             return spinal_env_viewer_plugin_group_manager_service_1.groupManagerService.addCategory(contextId, categoryName.trim(), iconName.trim());
@@ -80,12 +104,16 @@ class NomenclatureTree {
      * @param categoryName  - category name or id (not required)
      * @returns
      */
-    getCategories(contextId, categoryName) {
+    getCategories(categoryName, contextId) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            if (typeof contextId === "undefined") {
+                const context = yield this.getDefaultContext();
+                contextId = context.getId().get();
+            }
             const categories = yield spinal_env_viewer_plugin_group_manager_service_1.groupManagerService.getCategories(contextId);
             if (categoryName && categoryName.trim().length > 0) {
-                const category = categories.filter(el => el.name.get() === categoryName || el.id.get() === categoryName);
+                const category = categories.find(el => el.name.get() === categoryName || el.id.get() === categoryName);
                 return spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode((_a = category === null || category === void 0 ? void 0 : category.id) === null || _a === void 0 ? void 0 : _a.get());
             }
             return categories.map(el => { var _a; return spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode((_a = el === null || el === void 0 ? void 0 : el.id) === null || _a === void 0 ? void 0 : _a.get()); });
@@ -147,6 +175,33 @@ class NomenclatureTree {
             }
             return node;
         }
+    }
+    /**
+     * This methods takes as parameters a contextId and category id (not required), it returns all groups in category (or categories if not category id is set) in context
+     * @param contextId - context id
+     * @param categoryId - category id (not required)
+     * @returns
+     */
+    getGroups(contextId, categoryId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let categories = yield this.getCategories(categoryId, contextId);
+            if (categories) {
+                if (!Array.isArray(categories))
+                    categories = [categories];
+                const promises = categories.map((category) => __awaiter(this, void 0, void 0, function* () {
+                    const info = category.info.get();
+                    info.groups = yield spinal_env_viewer_plugin_group_manager_service_1.groupManagerService.getGroups(category.getId().get());
+                    return info;
+                }));
+                return Promise.all(promises).then((cats) => {
+                    return cats.map(category => {
+                        category.groups = category.groups.map(el => spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(el.id.get()));
+                        return category;
+                    });
+                });
+            }
+            return [];
+        });
     }
 }
 exports.NomenclatureTree = NomenclatureTree;

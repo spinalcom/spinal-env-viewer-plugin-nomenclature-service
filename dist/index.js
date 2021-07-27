@@ -14,6 +14,10 @@ function applyMixins(derivedConstructor, baseConstructors) {
     });
 }
 class SpinalNomenclatureService {
+    constructor() {
+        this.profileNodeType = "AttributeConfiguration";
+        this.defaultContextName = "NomenclatureConfiguration";
+    }
 }
 ;
 ;

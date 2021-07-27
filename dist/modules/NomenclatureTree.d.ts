@@ -1,4 +1,5 @@
 import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
+import { IGroups } from "../interfaces/IGroups";
 export declare class NomenclatureTree {
     profileNodeType: string;
     defaultContextName: string;
@@ -10,6 +11,7 @@ export declare class NomenclatureTree {
      * @returns Promise<SpinalContext>
      */
     createOrGetContext(contextName?: string): Promise<SpinalContext<any>>;
+    getDefaultContext(): Promise<SpinalContext<any>>;
     /**
      * This method returns a context (if contextName or id is passed) or all profil contexts
      * @param contextName - string - contextName not required
@@ -37,7 +39,7 @@ export declare class NomenclatureTree {
      * @param categoryName  - category name or id (not required)
      * @returns
      */
-    getCategories(contextId: string, categoryName?: string): Promise<SpinalNode<any> | SpinalNode<any>[]>;
+    getCategories(categoryName?: string, contextId?: string): Promise<SpinalNode<any> | SpinalNode<any>[]>;
     /**
      * This method updates a category, it takes as parameter two strings (categoryId and category new Values)
      * @param categoryId - string - the category Id
@@ -67,4 +69,11 @@ export declare class NomenclatureTree {
         name?: string;
         color?: string;
     }): SpinalNode<any> | void;
+    /**
+     * This methods takes as parameters a contextId and category id (not required), it returns all groups in category (or categories if not category id is set) in context
+     * @param contextId - context id
+     * @param categoryId - category id (not required)
+     * @returns
+     */
+    getGroups(contextId: string, categoryId?: string): Promise<IGroups[]>;
 }
