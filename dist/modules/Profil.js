@@ -134,12 +134,13 @@ class NomenclatureProfil {
         }
         return false;
     }
-    _getProfileElement(profileNode) {
+    _getProfileElement(profileInfo) {
         return __awaiter(this, void 0, void 0, function* () {
-            spinal_env_viewer_graph_service_1.SpinalGraphService._addNode(profileNode);
-            const element = yield profileNode.getElement();
+            // (<any>SpinalGraphService)._addNode(profileNode);
+            const realNode = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(profileInfo.id.get());
+            const element = yield realNode.getElement();
             const el = element.get();
-            el.id = profileNode.getId().get();
+            el.id = realNode.getId().get();
             return el;
         });
     }

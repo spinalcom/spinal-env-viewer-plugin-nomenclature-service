@@ -1,4 +1,4 @@
-import { SpinalNode } from "spinal-env-viewer-graph-service";
+import { SpinalNode, SpinalNodeRef } from "spinal-env-viewer-graph-service";
 import { IAttribute } from '../interfaces/IAttribute';
 import { IProfile } from '../interfaces/IProfile';
 export declare class NomenclatureProfil {
@@ -54,5 +54,5 @@ export declare class NomenclatureProfil {
      * @returns
      */
     deleteCurrentAsCurrentProfile(contextId: string): boolean;
-    _getProfileElement(profileNode: SpinalNode<any>): Promise<any>;
+    _getProfileElement(profileInfo: SpinalNodeRef): Promise<any>;
 }

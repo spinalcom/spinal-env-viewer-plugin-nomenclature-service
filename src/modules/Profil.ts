@@ -1,5 +1,5 @@
 import { Model, Ptr } from 'spinal-core-connectorjs_type';
-import { SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
+import { SpinalGraphService, SpinalNode, SpinalNodeRef } from "spinal-env-viewer-graph-service";
 import { groupManagerService } from "spinal-env-viewer-plugin-group-manager-service";
 import { IAttribute } from '../interfaces/IAttribute';
 import { IProfile } from '../interfaces/IProfile';
@@ -150,11 +150,12 @@ export class NomenclatureProfil {
    }
    
 
-   public async _getProfileElement(profileNode: SpinalNode<any>) {
-      (<any>SpinalGraphService)._addNode(profileNode);
-      const element = await profileNode.getElement();
+   public async _getProfileElement(profileInfo: SpinalNodeRef) {
+      // (<any>SpinalGraphService)._addNode(profileNode);
+      const realNode = SpinalGraphService.getRealNode(profileInfo.id.get());
+      const element = await realNode.getElement();
       const el = element.get();
-      el.id = profileNode.getId().get();
+      el.id = realNode.getId().get();
 
       return el;
    }
