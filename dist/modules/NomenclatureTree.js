@@ -1,4 +1,27 @@
 "use strict";
+/*
+ * Copyright 2022 SpinalCom - www.spinalcom.com
+ *
+ * This file is part of SpinalCore.
+ *
+ * Please read all of the following terms and conditions
+ * of the Free Software license Agreement ("Agreement")
+ * carefully.
+ *
+ * This Agreement is a legally binding contract between
+ * the Licensee (as defined below) and SpinalCom that
+ * sets forth the terms and conditions that govern your
+ * use of the Program. By installing and/or using the
+ * Program, you agree to abide by all the terms and
+ * conditions stated or referenced herein.
+ *
+ * If you do not agree to abide by these terms and
+ * conditions, do not demonstrate your acceptance and do
+ * not install or use the Program.
+ * You should have received a copy of the license along
+ * with this file. If not, see
+ * <http://resources.spinalcom.com/licenses.pdf>.
+ */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -57,9 +80,9 @@ class NomenclatureTree {
      * @param contextName - string - contextName not required
      * @returns Promise<SpinalContext | SpinalContext[]>
      */
-    getContexts(contextName) {
+    getContexts(contextName, graph) {
         return __awaiter(this, void 0, void 0, function* () {
-            const contexts = yield spinal_env_viewer_plugin_group_manager_service_1.groupManagerService.getGroupContexts(this.profileNodeType);
+            const contexts = yield spinal_env_viewer_plugin_group_manager_service_1.groupManagerService.getGroupContexts(this.profileNodeType, graph);
             if (contextName && contextName.trim().length > 0) {
                 const context = contexts.find(el => el.name === contextName || el.id === contextName);
                 return spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(context === null || context === void 0 ? void 0 : context.id);

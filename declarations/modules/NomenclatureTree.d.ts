@@ -1,4 +1,4 @@
-import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
+import { SpinalContext, SpinalGraph, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IGroups } from "../interfaces/IGroups";
 export declare class NomenclatureTree {
     profileNodeType: string;
@@ -17,7 +17,7 @@ export declare class NomenclatureTree {
      * @param contextName - string - contextName not required
      * @returns Promise<SpinalContext | SpinalContext[]>
      */
-    getContexts(contextName?: string): Promise<SpinalContext<any>[] | SpinalContext<any>>;
+    getContexts(contextName?: string, graph?: SpinalGraph<any>): Promise<SpinalContext<any>[] | SpinalContext<any>>;
     /**
      * This method updates a contextName, it takes as parameter two strings (contextId and context new Name)
      * @param contextId - string - the context id
